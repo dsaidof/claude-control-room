@@ -34,7 +34,7 @@ import {
   showInFinder,
   toPhone,
 } from "../lib/sessionActions.ts";
-import { act, closeName, openInIde, openSession, setState, useIdeName, useOpenName, useStore } from "../store.ts";
+import { act, closeName, jumpTo, openInIde, openSession, setState, useIdeName, useOpenName, useStore } from "../store.ts";
 import { FolderPicker } from "./Folders.tsx";
 import { NameEditor, openUrl } from "./Monitor.tsx";
 import { StatusOrb } from "./Primitives.tsx";
@@ -197,7 +197,7 @@ function Menu({ s, x, y }: { s: Session; x: number; y: number }) {
   const last = mine?.[mine.length - 1];
   const move = async () => {
     const r = (await act(`${s.pid}:move`, `/api/sessions/${s.pid}/move`)) as { ok: boolean; pid?: number };
-    if (r.ok && r.pid) setState({ drawer: r.pid, selected: r.pid, typeInto: r.pid });
+    if (r.ok && r.pid) jumpTo(r.pid);
   };
 
   return createPortal(

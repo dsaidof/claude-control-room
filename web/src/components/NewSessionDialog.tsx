@@ -6,7 +6,7 @@ import { fillSlots, pickPrompt as pickInto, promptSlots } from "../../../shared/
 import type { ActionResult, SavedPrompt, Snapshot } from "../../../shared/types.ts";
 import { folderName } from "../lib/format.ts";
 import { native } from "../lib/native.ts";
-import { api, consoleName, getState, remember, setState, startAccount, startFolder, stored, toast } from "../store.ts";
+import { api, consoleName, getState, jumpTo, remember, setState, startAccount, startFolder, stored, toast } from "../store.ts";
 import { PromptChips, SavePromptButton, usePrompts } from "./Prompts.tsx";
 
 const Console = lazy(() => import("./Console.tsx"));
@@ -156,8 +156,10 @@ export function NewSessionDialog({ snap }: { snap: Snapshot }) {
     if (!r.ok) return toast(r.message, "error");
     remember("cr.newSessionTune", mine);
     remember("cr.recentFolders", [cwd.trim(), ...stored<string[]>("cr.recentFolders", []).filter((f) => f !== cwd.trim())].slice(0, 8));
-    if (r.pid) setState({ panel: null, drawer: r.pid, selected: r.pid, typeInto: r.pid });
-    else if (r.name) setWaiting(r.name);
+    if (r.pid) {
+      setState({ panel: null });
+      jumpTo(r.pid);
+    } else if (r.name) setWaiting(r.name);
   };
 
   return (

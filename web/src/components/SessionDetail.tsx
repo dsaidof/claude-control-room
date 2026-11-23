@@ -5,7 +5,7 @@ import type { ChatLine, Session } from "../../../shared/types.ts";
 import { duration, folderName, money, startedLabel } from "../lib/format.ts";
 import { withKey } from "../lib/keys.ts";
 import { popoutSession } from "../lib/native.ts";
-import { act, api, closeName, consoleName, getState, openInIde, setState, useIdeName, useOpenName, useStore } from "../store.ts";
+import { act, api, closeName, consoleName, getState, jumpTo, openInIde, setState, useIdeName, useOpenName, useStore } from "../store.ts";
 import { AccountChip, ApprovalCard, NameEditor, openUrl, PrChip, QuestionCard, RemoteButton, RenameButton } from "./Monitor.tsx";
 import { StatusOrb, useNow } from "./Primitives.tsx";
 import { TuneChips } from "./Tuning.tsx";
@@ -78,7 +78,7 @@ function MoveHere({ s }: { s: Session }) {
   const move = async () => {
     const r = (await act(`${s.pid}:move`, `/api/sessions/${s.pid}/move`)) as { ok: boolean; pid?: number };
     setAsking(false);
-    if (r.ok && r.pid) setState({ drawer: r.pid, selected: r.pid, typeInto: r.pid });
+    if (r.ok && r.pid) jumpTo(r.pid);
   };
   return (
     <div className="move-card">

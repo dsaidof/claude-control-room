@@ -143,7 +143,19 @@ export function useIdeName(): string {
 /** Opens a terminal in the folder of the account you are on, else in the one Settings has for terminals. */
 export async function openTerminal(): Promise<void> {
   const r = (await act("terminal", "/api/terminal", { account: startAccount(getState()) }, true)) as ActionResult & { pid?: number };
-  if (r.ok && r.pid) setState({ drawer: r.pid, selected: r.pid, typeInto: r.pid });
+  if (r.ok && r.pid) jumpTo(r.pid);
+}
+
+// The server's answer that it started a session can reach the page just before the snapshot that lists it. Picked
+// then, Focus finds no such session and moves the pick to another; so the pick waits for that snapshot, 10s at most.
+let jumping: { pid: number; until: number } | null = null;
+
+/** Shows a session Control Room just started, with the keyboard in its console, as soon as the list has it. */
+export function jumpTo(pid: number): void {
+  if (state.snapshot?.sessions.some((s) => s.pid === pid)) {
+    jumping = null;
+    setState({ drawer: pid, selected: pid, typeInto: pid });
+  } else jumping = { pid, until: Date.now() + 10_000 };
 }
 
 /** Opens the session's folder in the IDE from Settings, to see its changes. */
@@ -244,6 +256,7 @@ export function connect(onSnapshot: (prev: Snapshot | null, next: Snapshot) => v
     const next = JSON.parse((ev as MessageEvent).data) as Snapshot;
     const prev = state.snapshot;
     setState({ snapshot: next, connected: true });
+    if (jumping) Date.now() < jumping.until ? jumpTo(jumping.pid) : (jumping = null);
     onSnapshot(prev, next);
   });
   es.onerror = () => setState({ connected: false });
